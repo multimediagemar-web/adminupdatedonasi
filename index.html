@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard - Masjid Ashqaf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus+Jakarta+Sans', sans-serif;
+            background-color: #cbd5e1; /* Latar abu-abu gelap untuk desktop agar batas HP terlihat */
+        }
+
+        /* Sembunyikan scrollbar tapi tetap bisa scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Tab Transition */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Mobile Wrapper -->
+    <div class="max-w-md mx-auto bg-slate-50 min-h-screen relative shadow-2xl sm:border-x sm:border-slate-300 overflow-hidden flex flex-col">
+
+        <!-- Top Navigation -->
+        <nav class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-lg text-emerald-300"></i>
+                    <span class="font-bold text-[15px] tracking-wide">Admin Ashqaf</span>
+                </div>
+                <div class="text-[10px] font-medium px-2 py-1 bg-emerald-800 rounded-full flex items-center gap-1.5 border border-emerald-600">
+                    <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div> Online
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Dashboard Container -->
+        <main class="flex-1 px-4 py-5 overflow-y-auto no-scrollbar pb-24">
+            
+            <!-- ================= VIEW 1: BERANDA ================= -->
+            <div id="view-home" class="space-y-5 fade-in block">
+                
+                <!-- Quick Stats Overview -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-emerald-500">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Target</p>
+                        <p class="text-sm font-black text-slate-800" id="stat-target">Rp 0</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-500">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Terkumpul</p>
+                        <p class="text-sm font-black text-blue-600" id="stat-collected">Rp 0</p>
+                    </div>
+                    <div class="col-span-2 bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-orange-500 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-orange-500"></i>
+                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Donasi Pending</p>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <p class="text-lg font-black text-orange-600 leading-none" id="stat-pending-count">0</p>
+                            <p class="text-[10px] text-slate-500">Data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Konfirmasi Donasi Baru -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 bg-orange-50/50 flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-bell text-orange-500"></i> Antrean Konfirmasi
+                        </h2>
+                        <span class="bg-orange-100 text-orange-700 text-[9px] px-2 py-0.5 rounded-full font-bold" id="pending-badge">0</span>
+                    </div>
+                    <div class="p-3 max-h-[60vh] overflow-y-auto no-scrollbar bg-slate-50" id="pending-list-container">
+                        <div class="text-center py-6 text-slate-400 text-xs">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 2: KEUANGAN ================= -->
+            <div id="view-finance" class="space-y-5 fade-in hidden">
+                
+                <!-- Ubah Ringkasan Dana Manual -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-wallet text-emerald-600"></i> Ubah Data Dana
+                        </h2>
+                    </div>
+                    <div class="p-3">
+                        <form id="form-update-target" class="space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target Total</label>
+                                    <input type="number" id="input-target-admin" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Terkumpul (Otomatis)</label>
+                                    <input type="number" id="input-collected-admin" class="w-full border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed rounded-lg px-3 py-2 text-sm outline-none" readonly>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors">Simpan Target Dana</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Manajemen Rincian Biaya -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice-dollar text-purple-600"></i> Rincian Biaya (Spending)
+                        </h2>
+                    </div>
+                    
+                    <div class="p-3">
+                        <div id="admin-spending-list-container" class="space-y-2 mb-4 max-h-40 overflow-y-auto no-scrollbar border border-slate-100 p-2 rounded-xl bg-slate-50">
+                            <div class="text-center py-2 text-slate-400 text-[10px]">Memuat item...</div>
+                        </div>
+
+                        <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tambah Baru</h3>
+                        <form id="form-add-spending" class="space-y-3 border-t border-slate-100 pt-3">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="col-span-2">
+                                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Nama Item</label>
+                                    <input type="text" id="spending-title" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500" required placeholder="Misal: Termin 1">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Nominal (Rp)</label>
+                                    <input type="number" id="spending-amount" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Status</label>
+                                    <select id="spending-status" class="w-full border border-slate-300 rounded-lg px-2 py-2 text-xs outline-none focus:border-purple-500 bg-white">
+                                        <option value="lunas">LUNAS</option>
+                                        <option value="menunggu">PENDING</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Urutan Tampil (Angka)</label>
+                                    <input type="number" id="spending-order" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500" required value="1">
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-add-spending" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-bold transition-colors">Tambah Rincian</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Daftar Donatur Tervalidasi -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-users text-blue-500"></i> Riwayat Donatur
+                        </h2>
+                        <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded" id="approved-count">0 Data</span>
+                    </div>
+                    <div class="p-3 max-h-60 overflow-y-auto no-scrollbar space-y-2.5 bg-slate-50" id="approved-list-container">
+                        <div class="text-center py-6 text-slate-400 text-xs">Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 3: KONTEN PUBLIK ================= -->
+            <div id="view-content" class="space-y-5 fade-in hidden">
+                
+                <!-- Posting Kabar Terbaru -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-newspaper text-blue-500"></i> Posting Kabar
+                        </h2>
+                    </div>
+                    <div class="p-3 space-y-4">
+                        <!-- Form -->
+                        <div>
+                            <form id="form-add-update" class="space-y-2.5">
+                                <input type="text" id="update-title" placeholder="Judul Kabar" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500" required>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="update-date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500" required>
+                                    <input type="url" id="update-image-url" placeholder="Link Foto (Opsional)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500">
+                                </div>
+                                <textarea id="update-description" rows="3" placeholder="Deskripsi/Isi kabar..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none resize-none focus:border-blue-500" required></textarea>
+                                <button type="submit" id="btn-add-update" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-bold transition-colors">Publish Kabar</button>
+                            </form>
+                        </div>
+
+                        <!-- List Updates -->
+                        <div class="border-t border-slate-100 pt-3">
+                            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Riwayat Kabar</h3>
+                            <div id="admin-updates-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <div class="text-center py-4 text-slate-400 text-[10px]">Memuat kabar...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pengaturan Tampilan Publik -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-palette text-pink-500"></i> Info & Tampilan Utama
+                        </h2>
+                    </div>
+                    <div class="p-3">
+                        <form id="form-update-settings" class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">Judul Utama</label>
+                                <input type="text" id="input-header-title" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-pink-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">Sub-judul</label>
+                                <input type="text" id="input-header-subtitle" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-pink-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">Link Foto Latar (Background Utama)</label>
+                                <input type="url" id="input-header-image" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-pink-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">Tentang Program (Paragraf Panjang)</label>
+                                <textarea id="input-program-desc" rows="5" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none resize-none focus:border-pink-500" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white px-3 py-2.5 rounded-lg text-sm font-bold transition-colors">Simpan Pengaturan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Bottom Tab Navigation -->
+        <nav class="absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center pt-2 pb-4 px-2 z-40 rounded-t-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center justify-center w-20 text-emerald-600 gap-1 transition-colors">
+                <i class="fa-solid fa-house text-[18px]"></i>
+                <span class="text-[10px] font-bold">Beranda</span>
+            </button>
+            <button onclick="switchTab('finance')" id="tab-finance" class="flex flex-col items-center justify-center w-20 text-slate-400 hover:text-emerald-500 gap-1 transition-colors">
+                <i class="fa-solid fa-wallet text-[18px]"></i>
+                <span class="text-[10px] font-bold">Keuangan</span>
+            </button>
+            <button onclick="switchTab('content')" id="tab-content" class="flex flex-col items-center justify-center w-20 text-slate-400 hover:text-emerald-500 gap-1 transition-colors">
+                <i class="fa-solid fa-bullhorn text-[18px]"></i>
+                <span class="text-[10px] font-bold">Konten Publik</span>
+            </button>
+        </nav>
+
+        <!-- Bottom Toast Notification Container -->
+        <div id="toast-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none w-full px-4 items-center"></div>
+
+    </div> <!-- End Mobile Wrapper -->
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabName) {
+            // Hide all views
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-finance').classList.add('hidden');
+            document.getElementById('view-content').classList.add('hidden');
+
+            // Reset tab styles
+            const baseTabClass = "flex flex-col items-center justify-center w-20 text-slate-400 hover:text-emerald-500 gap-1 transition-colors";
+            document.getElementById('tab-home').className = baseTabClass;
+            document.getElementById('tab-finance').className = baseTabClass;
+            document.getElementById('tab-content').className = baseTabClass;
+
+            // Show target view & set active tab style
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).className = "flex flex-col items-center justify-center w-20 text-emerald-600 gap-1 transition-colors";
+            
+            // Scroll to top when switching tab
+            document.querySelector('main').scrollTo(0,0);
+        }
+
+        // --- UI Helpers ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-red-500';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
+
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-center gap-2 transform transition-all duration-300 translate-y-10 opacity-0 text-[13px] font-medium w-full max-w-sm`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            if(!dateString) return "-";
+            return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        // Set default date
+        document.getElementById('update-date').valueAsDate = new Date();
+    </script>
+
+    <!-- --- Firebase Logic --- -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let app, auth, db, appId;
+        
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBHTiKq_I2G5rnGSiQdKT47mIUfdoVYRLI",
+                authDomain: "updatedonasidindingmasjid.firebaseapp.com",
+                projectId: "updatedonasidindingmasjid",
+                storageBucket: "updatedonasidindingmasjid.firebasestorage.app",
+                messagingSenderId: "987918671855",
+                appId: "1:987918671855:web:a5ab338e3cab6c68fb201a"
+            };
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            appId = 'masjid-ashqaf-production-v1'; 
+        } catch (error) {
+            console.error("Firebase Init Error:", error);
+        }
+
+        const campaignRef = doc(db, 'artifacts', appId, 'public', 'data', 'campaign_info', 'main');
+        const donorsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'donors');
+        const updatesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'updates');
+        const spendingColRef = collection(db, 'artifacts', appId, 'public', 'data', 'spending');
+
+        async function initAuth() {
+            try {
+                await signInAnonymously(auth);
+                setupListeners();
+            } catch (error) {
+                console.error("Auth failed:", error);
+                showToast("Gagal terkoneksi ke database", "error");
+            }
+        }
+
+        async function updateCampaignTotal(amountToAdd) {
+            try {
+                const snap = await getDoc(campaignRef);
+                if (snap.exists()) {
+                    const current = snap.data().collected || 0;
+                    await updateDoc(campaignRef, {
+                        collected: current + amountToAdd,
+                        lastUpdate: new Date().toISOString()
+                    });
+                }
+            } catch (error) { console.error("Update total error", error); }
+        }
+
+        function setupListeners() {
+            // 1. Campaign Data Listener
+            onSnapshot(campaignRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('stat-target').innerText = formatRupiah(data.target || 0);
+                    document.getElementById('stat-collected').innerText = formatRupiah(data.collected || 0);
+                    document.getElementById('input-target-admin').value = data.target || 0;
+                    document.getElementById('input-collected-admin').value = data.collected || 0;
+                    document.getElementById('input-header-title').value = data.headerTitle || '';
+                    document.getElementById('input-header-subtitle').value = data.headerSubtitle || '';
+                    document.getElementById('input-header-image').value = data.headerImageUrl || data.headerVideoUrl || '';
+                    document.getElementById('input-program-desc').value = data.programDescription || '';
+                }
+            }, (e) => {
+                if(e.code === 'permission-denied') showToast("Error Firebase: Cek Aturan Keamanan!", "error");
+            });
+
+            // 2. Donors Listener
+            onSnapshot(donorsColRef, (snapshot) => {
+                const allDonors = [];
+                snapshot.forEach(doc => allDonors.push({ id: doc.id, ...doc.data() }));
+                allDonors.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                const pendingDonors = allDonors.filter(d => d.status === 'pending');
+                const approvedDonors = allDonors.filter(d => d.status === 'approved');
+
+                // Render Pending
+                document.getElementById('stat-pending-count').innerText = pendingDonors.length;
+                document.getElementById('pending-badge').innerText = pendingDonors.length;
+                const pendingContainer = document.getElementById('pending-list-container');
+                pendingContainer.innerHTML = '';
+                
+                if(pendingDonors.length === 0) {
+                    pendingContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Kosong, tidak ada antrean.</div>`;
+                } else {
+                    pendingDonors.forEach(donor => {
+                        pendingContainer.innerHTML += `
+                            <div class="bg-white border border-orange-200 p-3 rounded-xl mb-3 shadow-sm">
+                                <div class="flex flex-col mb-2">
+                                    <div class="flex justify-between items-start">
+                                        <p class="text-xs font-bold text-slate-800 line-clamp-1">${donor.name}</p>
+                                        <p class="text-sm font-black text-orange-600 shrink-0 ml-2">${formatRupiah(donor.amount)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p class="text-[10px] text-slate-500"><i class="fa-brands fa-whatsapp text-emerald-500"></i> ${donor.wa || '-'}</p>
+                                        <p class="text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">${formatDate(donor.date)}</p>
+                                    </div>
+                                </div>
+                                ${donor.message ? `<div class="bg-orange-50 p-2 rounded border border-orange-100 text-[10px] text-slate-600 italic mb-2">"${donor.message}"</div>` : ''}
+                                <div class="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+                                    <button class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-2 rounded-lg admin-approve-btn" data-id="${donor.id}" data-amount="${donor.amount}"><i class="fa-solid fa-check mr-1"></i> Terima</button>
+                                    <button class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-bold py-2 rounded-lg admin-reject-btn" data-id="${donor.id}"><i class="fa-solid fa-xmark mr-1"></i> Tolak</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Render Approved
+                document.getElementById('approved-count').innerText = `${approvedDonors.length} Data`;
+                const approvedContainer = document.getElementById('approved-list-container');
+                approvedContainer.innerHTML = '';
+
+                if(approvedDonors.length === 0) {
+                    approvedContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Belum ada donatur tervalidasi.</div>`;
+                } else {
+                    approvedDonors.forEach(donor => {
+                        approvedContainer.innerHTML += `
+                            <div class="bg-white border border-slate-200 p-2.5 rounded-lg flex justify-between items-center shadow-sm">
+                                <div class="overflow-hidden pr-2">
+                                    <p class="text-[11px] font-bold text-slate-800 truncate w-full">${donor.name}</p>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">${formatDate(donor.date)}</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <p class="text-xs font-bold text-emerald-600">${formatRupiah(donor.amount)}</p>
+                                    <button class="text-slate-300 hover:text-red-500 p-1 admin-delete-approved-btn" data-id="${donor.id}" data-amount="${donor.amount}">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Events
+                document.querySelectorAll('.admin-approve-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        const amount = parseFloat(e.currentTarget.getAttribute('data-amount'));
+                        try {
+                            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id), { status: 'approved' });
+                            await updateCampaignTotal(amount);
+                            showToast("Donasi disetujui!");
+                        } catch (err) { showToast("Gagal", "error"); }
+                    });
+                });
+
+                document.querySelectorAll('.admin-reject-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if(confirm("Tolak & hapus data ini?")) {
+                            const id = e.currentTarget.getAttribute('data-id');
+                            try {
+                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
+                                showToast("Data dihapus.");
+                            } catch (err) { showToast("Gagal", "error"); }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.admin-delete-approved-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if(confirm("Hapus donatur ini? Total dana otomatis berkurang!")) {
+                            const id = e.currentTarget.closest('button').getAttribute('data-id');
+                            const amount = parseFloat(e.currentTarget.closest('button').getAttribute('data-amount'));
+                            try {
+                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
+                                await updateCampaignTotal(-amount);
+                                showToast("Data dihapus.");
+                            } catch (err) { showToast("Gagal", "error"); }
+                        }
+                    });
+                });
+            }, (e) => console.error(e));
+
+            // 3. Spending Listener
+            onSnapshot(spendingColRef, (snapshot) => {
+                const spendingItems = [];
+                snapshot.forEach(doc => spendingItems.push({ id: doc.id, ...doc.data() }));
+                spendingItems.sort((a, b) => a.order - b.order); 
+
+                const container = document.getElementById('admin-spending-list-container');
+                container.innerHTML = '';
+
+                if (spendingItems.length === 0) {
+                    container.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">Belum ada rincian.</div>`;
+                } else {
+                    spendingItems.forEach((item) => {
+                        const isLunas = item.status === 'lunas';
+                        const badgeClass = isLunas ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700";
+                        
+                        container.innerHTML += `
+                            <div class="flex justify-between items-center bg-white p-2 border border-slate-200 rounded-lg text-xs shadow-sm mb-1.5">
+                                <div class="flex-grow">
+                                    <div class="font-bold text-slate-700 text-[11px] mb-0.5">${item.order}. ${item.title}</div> 
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-slate-600 font-medium">${formatRupiah(item.amount)}</span>
+                                        <span class="text-[8px] px-1.5 py-0.5 font-bold ${badgeClass} rounded">${item.status.toUpperCase()}</span>
+                                    </div>
+                                </div>
+                                <button class="text-slate-300 hover:text-red-500 p-2 admin-delete-spending-btn shrink-0" data-id="${item.id}">
+                                    <i class="fa-solid fa-trash text-[10px]"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+
+                    document.querySelectorAll('.admin-delete-spending-btn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = e.currentTarget.getAttribute('data-id');
+                            if(confirm("Hapus rincian ini?")) {
+                                try {
+                                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spending', id));
+                                    showToast("Rincian dihapus");
+                                } catch(err) { showToast("Gagal", "error"); }
+                            }
+                        });
+                    });
+                }
+            }, (e) => console.error(e));
+
+            // 4. Updates Listener
+            onSnapshot(updatesColRef, (snapshot) => {
+                const updates = [];
+                snapshot.forEach(doc => updates.push({ id: doc.id, ...doc.data() }));
+                updates.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                const container = document.getElementById('admin-updates-list');
+                container.innerHTML = '';
+                
+                if(updates.length === 0) {
+                    container.innerHTML = `<div class="text-center py-4 text-slate-400 text-[10px]">Belum ada kabar.</div>`;
+                }
+
+                updates.forEach(update => {
+                    container.innerHTML += `
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center gap-2 shadow-sm mb-1.5">
+                            <div class="overflow-hidden">
+                                <p class="text-[9px] font-bold text-emerald-600 mb-0.5">${formatDate(update.date)}</p>
+                                <h4 class="font-bold text-[11px] text-slate-800 truncate">${update.title}</h4>
+                            </div>
+                            <button class="text-slate-300 hover:text-red-500 shrink-0 p-1 admin-delete-update-btn" data-id="${update.id}">
+                                <i class="fa-solid fa-trash text-[10px]"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+
+                document.querySelectorAll('.admin-delete-update-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const id = e.currentTarget.closest('button').getAttribute('data-id');
+                        if(confirm("Hapus kabar ini?")) {
+                            try {
+                                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'updates', id));
+                                showToast("Kabar dihapus");
+                            } catch(err) { showToast("Gagal", "error"); }
+                        }
+                    });
+                });
+            }, (e) => console.error(e));
+        }
+
+        // --- Form Handlers ---
+        document.getElementById('form-update-target').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+
+            try {
+                await setDoc(campaignRef, { 
+                    target: parseFloat(document.getElementById('input-target-admin').value),
+                    lastUpdate: new Date().toISOString()
+                }, { merge: true });
+                showToast("Target dana diperbarui!");
+            } catch(error) { showToast("Gagal", "error"); } 
+            finally { btn.innerText = originalText; btn.disabled = false; }
+        });
+
+        document.getElementById('form-add-spending').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-add-spending');
+            const originalText = btn.innerText;
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+
+            try {
+                await addDoc(spendingColRef, {
+                    title: document.getElementById('spending-title').value,
+                    amount: parseFloat(document.getElementById('spending-amount').value),
+                    status: document.getElementById('spending-status').value,
+                    order: parseInt(document.getElementById('spending-order').value)
+                });
+                showToast("Rincian ditambahkan!");
+                const currentOrder = parseInt(document.getElementById('spending-order').value) || 1;
+                e.target.reset();
+                document.getElementById('spending-order').value = currentOrder + 1;
+            } catch (error) { showToast("Gagal", "error"); } 
+            finally { btn.innerText = originalText; btn.disabled = false; }
+        });
+
+        document.getElementById('form-add-update').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-add-update');
+            const originalText = btn.innerText;
+            btn.innerText = 'Memposting...'; btn.disabled = true;
+
+            try {
+                await addDoc(updatesColRef, {
+                    title: document.getElementById('update-title').value,
+                    date: document.getElementById('update-date').value,
+                    description: document.getElementById('update-description').value,
+                    imageUrl: document.getElementById('update-image-url').value || null
+                });
+                showToast("Kabar diposting!");
+                e.target.reset();
+                document.getElementById('update-date').valueAsDate = new Date();
+            } catch (error) { showToast("Gagal", "error"); }
+            finally { btn.innerText = originalText; btn.disabled = false; }
+        });
+
+        document.getElementById('form-update-settings').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+
+            try {
+                await setDoc(campaignRef, { 
+                    headerTitle: document.getElementById('input-header-title').value,
+                    headerSubtitle: document.getElementById('input-header-subtitle').value,
+                    headerImageUrl: document.getElementById('input-header-image').value,
+                    programDescription: document.getElementById('input-program-desc').value,
+                    lastUpdate: new Date().toISOString()
+                }, { merge: true });
+                showToast("Pengaturan disimpan!");
+            } catch (error) { showToast("Gagal", "error"); } 
+            finally { btn.innerText = originalText; btn.disabled = false; }
+        });
+
+        if (app) initAuth();
+    </script>
+</body>
+</html>
