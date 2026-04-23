@@ -152,6 +152,10 @@
                                     </select>
                                 </div>
                                 <div class="col-span-2">
+                                    <label class="block text-[11px] font-medium text-slate-600 mb-1">Link Foto Nota/Dokumentasi (Opsional)</label>
+                                    <input type="url" id="spending-nota-url" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500" placeholder="https://...">
+                                </div>
+                                <div class="col-span-2">
                                     <label class="block text-[11px] font-medium text-slate-600 mb-1">Urutan Tampil (Angka)</label>
                                     <input type="number" id="spending-order" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500" required value="1">
                                 </div>
@@ -258,8 +262,23 @@
             </button>
         </nav>
 
+        <!-- Custom Modal Konfirmasi -->
+        <div id="confirm-modal" class="absolute inset-0 bg-slate-900/60 z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl p-5 w-[85%] shadow-xl transform scale-95 transition-transform duration-300" id="confirm-modal-box">
+                <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 text-center text-[15px] mb-1" id="confirm-modal-title">Konfirmasi</h3>
+                <p class="text-[11px] text-slate-500 text-center mb-5 leading-relaxed" id="confirm-modal-desc">Apakah Anda yakin?</p>
+                <div class="flex gap-2">
+                    <button id="confirm-btn-cancel" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Batal</button>
+                    <button id="confirm-btn-ok" class="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors flex justify-center items-center">Hapus</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Bottom Toast Notification Container -->
-        <div id="toast-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none w-full px-4 items-center"></div>
+        <div id="toast-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[110] flex flex-col gap-2 pointer-events-none w-full px-4 items-center"></div>
 
     </div> <!-- End Mobile Wrapper -->
 
@@ -283,6 +302,55 @@
             
             // Scroll to top when switching tab
             document.querySelector('main').scrollTo(0,0);
+        }
+
+        // --- Custom Confirm Modal Logic ---
+        function showConfirmModal(title, desc, onConfirmCallback) {
+            const modal = document.getElementById('confirm-modal');
+            const box = document.getElementById('confirm-modal-box');
+            
+            document.getElementById('confirm-modal-title').innerText = title;
+            document.getElementById('confirm-modal-desc').innerText = desc;
+            
+            // Tampilkan modal dengan animasi
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+            }, 10);
+
+            const btnOk = document.getElementById('confirm-btn-ok');
+            const btnCancel = document.getElementById('confirm-btn-cancel');
+            
+            // Bersihkan Event Listener lama dengan men-clone tombol
+            const newBtnOk = btnOk.cloneNode(true);
+            const newBtnCancel = btnCancel.cloneNode(true);
+            btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+            const hideModal = () => {
+                modal.classList.add('opacity-0');
+                box.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 300);
+            };
+
+            newBtnCancel.addEventListener('click', hideModal);
+            
+            newBtnOk.addEventListener('click', async () => {
+                const originalText = newBtnOk.innerHTML;
+                newBtnOk.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; // Loading icon
+                newBtnOk.disabled = true;
+                
+                await onConfirmCallback();
+                
+                hideModal();
+                newBtnOk.innerHTML = originalText;
+                newBtnOk.disabled = false;
+            });
         }
 
         // --- UI Helpers ---
@@ -470,27 +538,28 @@
 
                 document.querySelectorAll('.admin-reject-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if(confirm("Tolak & hapus data ini?")) {
-                            const id = e.currentTarget.getAttribute('data-id');
+                        const id = e.currentTarget.getAttribute('data-id');
+                        showConfirmModal("Tolak Donasi", "Data antrean donasi ini akan dihapus dan batal diproses.", async () => {
                             try {
                                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
                                 showToast("Data dihapus.");
                             } catch (err) { showToast("Gagal", "error"); }
-                        }
+                        });
                     });
                 });
 
                 document.querySelectorAll('.admin-delete-approved-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if(confirm("Hapus donatur ini? Total dana otomatis berkurang!")) {
-                            const id = e.currentTarget.closest('button').getAttribute('data-id');
-                            const amount = parseFloat(e.currentTarget.closest('button').getAttribute('data-amount'));
+                        const targetBtn = e.currentTarget.closest('button');
+                        const id = targetBtn.getAttribute('data-id');
+                        const amount = parseFloat(targetBtn.getAttribute('data-amount'));
+                        showConfirmModal("Hapus Riwayat Donatur", "Total dana yang terkumpul akan otomatis dikurangi sejumlah donasi ini.", async () => {
                             try {
                                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
                                 await updateCampaignTotal(-amount);
                                 showToast("Data dihapus.");
                             } catch (err) { showToast("Gagal", "error"); }
-                        }
+                        });
                     });
                 });
             }, (e) => console.error(e));
@@ -510,32 +579,37 @@
                     spendingItems.forEach((item) => {
                         const isLunas = item.status === 'lunas';
                         const badgeClass = isLunas ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700";
+                        const notaButton = item.notaUrl ? `<a href="${item.notaUrl}" target="_blank" class="mt-1 inline-block bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] px-2.5 py-1.5 rounded font-medium transition-colors border border-slate-200"><i class="fa-solid fa-file-invoice mr-1"></i> Lihat Nota / Bukti</a>` : '';
                         
                         container.innerHTML += `
-                            <div class="flex justify-between items-center bg-white p-2 border border-slate-200 rounded-lg text-xs shadow-sm mb-1.5">
-                                <div class="flex-grow">
-                                    <div class="font-bold text-slate-700 text-[11px] mb-0.5">${item.order}. ${item.title}</div> 
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-600 font-medium">${formatRupiah(item.amount)}</span>
-                                        <span class="text-[8px] px-1.5 py-0.5 font-bold ${badgeClass} rounded">${item.status.toUpperCase()}</span>
+                            <div class="flex flex-col bg-white p-2.5 border border-slate-200 rounded-lg text-xs shadow-sm mb-1.5">
+                                <div class="flex justify-between items-start w-full">
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-slate-700 text-[11px] mb-0.5">${item.order}. ${item.title}</div> 
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-slate-600 font-medium">${formatRupiah(item.amount)}</span>
+                                            <span class="text-[8px] px-1.5 py-0.5 font-bold ${badgeClass} rounded">${item.status.toUpperCase()}</span>
+                                        </div>
                                     </div>
+                                    <button class="text-slate-300 hover:text-red-500 p-2 admin-delete-spending-btn shrink-0" data-id="${item.id}">
+                                        <i class="fa-solid fa-trash text-[10px]"></i>
+                                    </button>
                                 </div>
-                                <button class="text-slate-300 hover:text-red-500 p-2 admin-delete-spending-btn shrink-0" data-id="${item.id}">
-                                    <i class="fa-solid fa-trash text-[10px]"></i>
-                                </button>
+                                ${notaButton ? `<div class="w-full mt-2 pt-2 border-t border-slate-100">${notaButton}</div>` : ''}
                             </div>
                         `;
                     });
 
                     document.querySelectorAll('.admin-delete-spending-btn').forEach(btn => {
                         btn.addEventListener('click', async (e) => {
-                            const id = e.currentTarget.getAttribute('data-id');
-                            if(confirm("Hapus rincian ini?")) {
+                            const targetBtn = e.currentTarget.closest('button');
+                            const id = targetBtn.getAttribute('data-id');
+                            showConfirmModal("Hapus Rincian Biaya", "Rincian biaya ini akan dihapus secara permanen dari daftar pengeluaran.", async () => {
                                 try {
                                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spending', id));
                                     showToast("Rincian dihapus");
                                 } catch(err) { showToast("Gagal", "error"); }
-                            }
+                            });
                         });
                     });
                 }
@@ -570,13 +644,14 @@
 
                 document.querySelectorAll('.admin-delete-update-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        const id = e.currentTarget.closest('button').getAttribute('data-id');
-                        if(confirm("Hapus kabar ini?")) {
+                        const targetBtn = e.currentTarget.closest('button');
+                        const id = targetBtn.getAttribute('data-id');
+                        showConfirmModal("Hapus Kabar", "Kabar/update ini akan dihapus dan tidak lagi tampil di halaman donatur.", async () => {
                             try {
                                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'updates', id));
                                 showToast("Kabar dihapus");
                             } catch(err) { showToast("Gagal", "error"); }
-                        }
+                        });
                     });
                 });
             }, (e) => console.error(e));
@@ -606,11 +681,14 @@
             btn.innerText = 'Menyimpan...'; btn.disabled = true;
 
             try {
+                const notaUrlInput = document.getElementById('spending-nota-url').value;
+
                 await addDoc(spendingColRef, {
                     title: document.getElementById('spending-title').value,
                     amount: parseFloat(document.getElementById('spending-amount').value),
                     status: document.getElementById('spending-status').value,
-                    order: parseInt(document.getElementById('spending-order').value)
+                    order: parseInt(document.getElementById('spending-order').value),
+                    notaUrl: notaUrlInput ? notaUrlInput : null
                 });
                 showToast("Rincian ditambahkan!");
                 const currentOrder = parseInt(document.getElementById('spending-order').value) || 1;
