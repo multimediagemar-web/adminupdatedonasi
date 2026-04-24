@@ -52,7 +52,7 @@
         </nav>
 
         <!-- Main Dashboard Container -->
-        <main class="flex-1 px-4 py-5 overflow-y-auto no-scrollbar pb-24">
+        <main class="flex-1 px-4 py-5 overflow-y-auto no-scrollbar pb-32">
             
             <!-- ================= VIEW 1: BERANDA ================= -->
             <div id="view-home" class="space-y-5 fade-in block">
@@ -246,8 +246,8 @@
 
         </main>
         
-        <!-- Bottom Tab Navigation -->
-        <nav class="absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center pt-2 pb-4 px-2 z-40 rounded-t-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <!-- Bottom Tab Navigation (Floating) -->
+        <nav class="absolute bottom-6 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200 flex justify-around items-center py-3 px-2 z-40 rounded-2xl shadow-2xl">
             <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center justify-center w-20 text-emerald-600 gap-1 transition-colors">
                 <i class="fa-solid fa-house text-[18px]"></i>
                 <span class="text-[10px] font-bold">Beranda</span>
@@ -278,7 +278,7 @@
         </div>
 
         <!-- Bottom Toast Notification Container -->
-        <div id="toast-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[110] flex flex-col gap-2 pointer-events-none w-full px-4 items-center"></div>
+        <div id="toast-container" class="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-[110] flex flex-col gap-2 pointer-events-none w-full px-4 items-center"></div>
 
     </div> <!-- End Mobile Wrapper -->
 
