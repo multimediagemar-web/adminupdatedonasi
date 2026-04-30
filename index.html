@@ -99,10 +99,10 @@
                                             <i class="fa-solid fa-rotate"></i> Sinkronkan
                                         </button>
                                     </div>
-                                    <input type="number" id="input-collected-admin" class="w-full border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed rounded-lg px-3 py-2 text-sm outline-none" readonly>
+                                    <input type="number" id="input-collected-admin" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" required>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors">Simpan Target Dana</button>
+                            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors">Simpan Data Dana</button>
                         </form>
                     </div>
                 </div>
@@ -153,18 +153,51 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 flex justify-between items-center bg-green-50/50">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-file-csv text-green-600"></i> Import Donatur (CSV)
+                            <i class="fa-solid fa-file-csv text-green-600"></i> Import & Eksport (CSV)
                         </h2>
                     </div>
                     <div class="p-3">
-                        <p class="text-[10px] text-slate-500 mb-3 leading-relaxed">Format baris: <code class="bg-slate-100 px-1 py-0.5 rounded text-red-500 font-bold">nama,jumlah,tanggal(opsional)</code>. Contoh: <code class="bg-slate-100 px-1 py-0.5 rounded text-red-500 font-bold">Budi,50000,25-09-24</code>. Tidak perlu baris header. Data otomatis Lunas & masuk Total Dana.</p>
-                        <div class="flex items-center gap-2">
+                        <p class="text-[10px] text-slate-500 mb-3 leading-relaxed">Format baris: <code class="bg-slate-100 px-1 py-0.5 rounded text-red-500 font-bold">tanggal,nama lengkap,jumlah</code>. Contoh: <code class="bg-slate-100 px-1 py-0.5 rounded text-red-500 font-bold">2026-04-24,Budi,50000</code>. Baris judul otomatis diabaikan. Data otomatis Lunas & masuk Total Dana.</p>
+                        
+                        <div id="csv-input-container" class="flex items-center gap-2 mb-3">
                             <input type="file" id="input-csv" accept=".csv" class="hidden">
                             <label for="input-csv" class="flex-1 border border-slate-300 border-dashed rounded-lg px-3 py-2 text-[11px] text-center text-slate-500 cursor-pointer hover:bg-slate-50 transition-colors truncate" id="label-csv-name">
-                                Pilih File CSV...
+                                <i class="fa-solid fa-upload mr-1"></i> Pilih File CSV...
                             </label>
-                            <button id="btn-process-csv" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors disabled:opacity-50">
-                                Import
+                        </div>
+
+                        <!-- TAMPILAN PRATINJAU -->
+                        <div id="csv-preview-container" class="hidden mb-3">
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 mb-2 max-h-40 overflow-y-auto no-scrollbar">
+                                <table class="w-full text-left text-[10px] text-slate-600">
+                                    <thead class="sticky top-0 bg-slate-50 text-slate-500 font-bold shadow-[0_1px_0_0_#e2e8f0]">
+                                        <tr>
+                                            <th class="py-1 px-1">Tanggal</th>
+                                            <th class="py-1 px-1">Nama</th>
+                                            <th class="py-1 px-1 text-right">Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="csv-preview-table-body" class="divide-y divide-slate-100">
+                                        <!-- Data akan dimuat di sini -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-between items-center mb-2 px-1">
+                                <span class="text-[10px] font-bold text-slate-500" id="csv-preview-count">0 Data</span>
+                                <span class="text-[10px] font-bold text-emerald-600" id="csv-preview-total">Rp 0</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="btn-cancel-csv" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 px-2 py-2 rounded-lg text-[10px] font-bold transition-colors">Batal</button>
+                                <button id="btn-process-csv" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-2 py-2 rounded-lg text-[10px] font-bold transition-colors">Proses Import</button>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-3 border-t border-slate-100">
+                            <button id="btn-download-format" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-2 rounded-lg text-[10px] font-bold transition-colors border border-slate-200">
+                                <i class="fa-solid fa-download mr-1"></i> Format CSV
+                            </button>
+                            <button id="btn-export-csv" class="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-2 rounded-lg text-[10px] font-bold transition-colors border border-emerald-200">
+                                <i class="fa-solid fa-file-export mr-1"></i> Eksport Data
                             </button>
                         </div>
                     </div>
@@ -175,7 +208,17 @@
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-users text-blue-500"></i> Riwayat Donatur
                         </h2>
-                        <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded" id="approved-count">0 Data</span>
+                        <div class="flex items-center gap-2">
+                            <!-- TOMBOL HAPUS SEMUA -->
+                            <button id="btn-delete-all" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-[10px] font-bold transition-colors border border-red-300" title="Hapus Semua Riwayat">
+                                <i class="fa-solid fa-dumpster"></i>
+                            </button>
+                            <!-- TOMBOL BARU HAPUS TERPILIH -->
+                            <button id="btn-delete-selected" class="hidden bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded text-[10px] font-bold transition-colors border border-red-200">
+                                <i class="fa-solid fa-trash mr-1"></i>Hapus (<span id="delete-selected-count">0</span>)
+                            </button>
+                            <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded" id="approved-count">0 Data</span>
+                        </div>
                     </div>
                     <div class="p-3 max-h-60 overflow-y-auto no-scrollbar space-y-2.5 bg-slate-50" id="approved-list-container">
                         <div class="text-center py-6 text-slate-400 text-xs">Memuat data...</div>
@@ -265,7 +308,7 @@
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                 </div>
                 <h3 class="font-bold text-slate-800 text-center text-[15px] mb-1" id="confirm-modal-title">Konfirmasi</h3>
-                <p class="text-[11px] text-slate-500 text-center mb-5 leading-relaxed" id="confirm-modal-desc">Apakah Anda yakin?</p>
+                <p class="text-[11px] text-slate-500 text-center mb-5 leading-relaxed whitespace-pre-wrap" id="confirm-modal-desc">Apakah Anda yakin?</p>
                 <div class="flex gap-2">
                     <button id="confirm-btn-cancel" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Batal</button>
                     <button id="confirm-btn-ok" class="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors flex justify-center items-center">Hapus</button>
@@ -361,13 +404,27 @@
             return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
+        function updateMultiDeleteUI() {
+            const checkedBoxes = document.querySelectorAll('.donor-checkbox:checked');
+            const count = checkedBoxes.length;
+            const btn = document.getElementById('btn-delete-selected');
+            const countSpan = document.getElementById('delete-selected-count');
+
+            if (count > 0) {
+                btn.classList.remove('hidden');
+                countSpan.innerText = count;
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
         document.getElementById('update-date').valueAsDate = new Date();
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let app, auth, db, appId;
         
@@ -460,8 +517,9 @@
                 if(pendingDonors.length === 0) {
                     pendingContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Kosong, tidak ada antrean.</div>`;
                 } else {
+                    let pendingHtml = '';
                     pendingDonors.forEach(donor => {
-                        pendingContainer.innerHTML += `
+                        pendingHtml += `
                             <div class="bg-white border border-orange-200 p-3 rounded-xl mb-3 shadow-sm">
                                 <div class="flex flex-col mb-2">
                                     <div class="flex justify-between items-start">
@@ -481,22 +539,30 @@
                             </div>
                         `;
                     });
+                    pendingContainer.innerHTML = pendingHtml;
                 }
 
                 // Render Approved
                 document.getElementById('approved-count').innerText = `${approvedDonors.length} Data`;
                 const approvedContainer = document.getElementById('approved-list-container');
-                approvedContainer.innerHTML = '';
 
                 if(approvedDonors.length === 0) {
                     approvedContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Belum ada donatur tervalidasi.</div>`;
                 } else {
-                    approvedDonors.forEach(donor => {
-                        approvedContainer.innerHTML += `
+                    let approvedHtml = '';
+                    // Batasi hanya menampilkan 50 data awal agar aplikasi tidak lag
+                    const displayLimit = 50;
+                    const donorsToDisplay = approvedDonors.slice(0, displayLimit);
+
+                    donorsToDisplay.forEach(donor => {
+                        approvedHtml += `
                             <div class="bg-white border border-slate-200 p-2.5 rounded-lg flex justify-between items-center shadow-sm">
-                                <div class="overflow-hidden pr-2">
-                                    <p class="text-[11px] font-bold text-slate-800 truncate w-full">${donor.name}</p>
-                                    <p class="text-[9px] text-slate-400 mt-0.5">${formatDate(donor.date)}</p>
+                                <div class="flex items-center gap-2.5 overflow-hidden flex-1 pr-2">
+                                    <input type="checkbox" class="donor-checkbox w-3.5 h-3.5 text-red-500 rounded border-slate-300 focus:ring-red-500 shrink-0 cursor-pointer" data-id="${donor.id}" data-amount="${donor.amount}">
+                                    <div class="overflow-hidden">
+                                        <p class="text-[11px] font-bold text-slate-800 truncate w-full">${donor.name}</p>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">${formatDate(donor.date)}</p>
+                                    </div>
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
                                     <p class="text-xs font-bold text-emerald-600">${formatRupiah(donor.amount)}</p>
@@ -507,7 +573,22 @@
                             </div>
                         `;
                     });
+
+                    // Tampilkan pesan jika ada sisa data yang disembunyikan
+                    if (approvedDonors.length > displayLimit) {
+                        approvedHtml += `<div class="text-center py-3 text-slate-500 text-[10px] bg-slate-100 font-medium rounded mt-2">...dan ${approvedDonors.length - displayLimit} data lainnya (Disembunyikan agar aplikasi tetap ringan)</div>`;
+                    }
+
+                    approvedContainer.innerHTML = approvedHtml;
                 }
+
+                // Reset UI Tombol Hapus Multiple setiap kali data baru di render
+                updateMultiDeleteUI();
+
+                // Attach Event: Checkbox change
+                document.querySelectorAll('.donor-checkbox').forEach(cb => {
+                    cb.addEventListener('change', updateMultiDeleteUI);
+                });
 
                 // Action Events
                 document.querySelectorAll('.admin-approve-btn').forEach(btn => {
@@ -562,12 +643,13 @@
                 if (spendingItems.length === 0) {
                     container.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">Belum ada rincian.</div>`;
                 } else {
+                    let spendingHtml = '';
                     spendingItems.forEach((item) => {
                         const isLunas = item.status === 'lunas';
                         const badgeClass = isLunas ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700";
                         const notaButton = item.notaUrl ? `<a href="${item.notaUrl}" target="_blank" class="mt-1 inline-block bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] px-2.5 py-1.5 rounded font-medium transition-colors border border-slate-200"><i class="fa-solid fa-file-invoice mr-1"></i> Lihat Nota</a>` : '';
                         
-                        container.innerHTML += `
+                        spendingHtml += `
                             <div class="flex flex-col bg-white p-2.5 border border-slate-200 rounded-lg text-xs shadow-sm mb-1.5">
                                 <div class="flex justify-between items-start w-full">
                                     <div class="flex-grow">
@@ -585,6 +667,7 @@
                             </div>
                         `;
                     });
+                    container.innerHTML = spendingHtml;
 
                     document.querySelectorAll('.admin-delete-spending-btn').forEach(btn => {
                         btn.addEventListener('click', async (e) => {
@@ -612,21 +695,23 @@
                 
                 if(updates.length === 0) {
                     container.innerHTML = `<div class="text-center py-4 text-slate-400 text-[10px]">Belum ada kabar.</div>`;
-                }
-
-                updates.forEach(update => {
-                    container.innerHTML += `
-                        <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center gap-2 shadow-sm mb-1.5">
-                            <div class="overflow-hidden">
-                                <p class="text-[9px] font-bold text-emerald-600 mb-0.5">${formatDate(update.date)}</p>
-                                <h4 class="font-bold text-[11px] text-slate-800 truncate">${update.title}</h4>
+                } else {
+                    let updatesHtml = '';
+                    updates.forEach(update => {
+                        updatesHtml += `
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-between items-center gap-2 shadow-sm mb-1.5">
+                                <div class="overflow-hidden">
+                                    <p class="text-[9px] font-bold text-emerald-600 mb-0.5">${formatDate(update.date)}</p>
+                                    <h4 class="font-bold text-[11px] text-slate-800 truncate">${update.title}</h4>
+                                </div>
+                                <button class="text-slate-300 hover:text-red-500 shrink-0 p-1 admin-delete-update-btn" data-id="${update.id}">
+                                    <i class="fa-solid fa-trash text-[10px]"></i>
+                                </button>
                             </div>
-                            <button class="text-slate-300 hover:text-red-500 shrink-0 p-1 admin-delete-update-btn" data-id="${update.id}">
-                                <i class="fa-solid fa-trash text-[10px]"></i>
-                            </button>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                    container.innerHTML = updatesHtml;
+                }
 
                 document.querySelectorAll('.admin-delete-update-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
@@ -643,6 +728,78 @@
             });
         }
 
+        // --- Multi Delete Handler ---
+        document.getElementById('btn-delete-selected').addEventListener('click', () => {
+            const checkedBoxes = document.querySelectorAll('.donor-checkbox:checked');
+            if (checkedBoxes.length === 0) return;
+
+            let totalAmountToDeduct = 0;
+            const idsToDelete = [];
+
+            checkedBoxes.forEach(box => {
+                idsToDelete.push(box.getAttribute('data-id'));
+                totalAmountToDeduct += parseFloat(box.getAttribute('data-amount') || 0);
+            });
+
+            showConfirmModal(
+                "Hapus Beberapa Donatur", 
+                `Anda akan menghapus ${idsToDelete.length} data donatur.\nTotal dana akan otomatis dikurangi sebesar ${formatRupiah(totalAmountToDeduct)}.\n\nLanjutkan?`, 
+                async () => {
+                    try {
+                        const chunkSize = 400; // Firebase limit 500
+                        for (let i = 0; i < idsToDelete.length; i += chunkSize) {
+                            const chunk = idsToDelete.slice(i, i + chunkSize);
+                            const batch = writeBatch(db);
+                            chunk.forEach(id => {
+                                batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
+                            });
+                            await batch.commit();
+                        }
+                        
+                        await updateCampaignTotal(-totalAmountToDeduct);
+                        showToast(`${idsToDelete.length} Data berhasil dihapus!`);
+                        
+                        document.getElementById('btn-delete-selected').classList.add('hidden');
+                    } catch (err) {
+                        showToast("Gagal menghapus beberapa data", "error");
+                    }
+                }
+            );
+        });
+
+        // --- Delete All Handler ---
+        document.getElementById('btn-delete-all').addEventListener('click', () => {
+            if (globalApprovedDonors.length === 0) return showToast("Tidak ada data untuk dihapus.", "error");
+
+            let totalAmountToDeduct = 0;
+            globalApprovedDonors.forEach(donor => {
+                totalAmountToDeduct += (donor.amount || 0);
+            });
+
+            showConfirmModal(
+                "Hapus SEMUA Riwayat Donatur", 
+                `PERINGATAN! Anda akan menghapus SELURUH data donatur (${globalApprovedDonors.length} data).\nTotal dana akan otomatis dikurangi sebesar ${formatRupiah(totalAmountToDeduct)}.\n\nTindakan ini permanen. Lanjutkan?`, 
+                async () => {
+                    try {
+                        const chunkSize = 400;
+                        for (let i = 0; i < globalApprovedDonors.length; i += chunkSize) {
+                            const chunk = globalApprovedDonors.slice(i, i + chunkSize);
+                            const batch = writeBatch(db);
+                            chunk.forEach(donor => {
+                                batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'donors', donor.id));
+                            });
+                            await batch.commit();
+                        }
+                        
+                        await updateCampaignTotal(-totalAmountToDeduct);
+                        showToast(`Seluruh riwayat donatur berhasil dihapus!`);
+                    } catch (err) {
+                        showToast("Gagal menghapus semua data", "error");
+                    }
+                }
+            );
+        });
+
         // --- Form Handlers ---
         document.getElementById('form-update-target').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -652,9 +809,10 @@
             try {
                 await setDoc(campaignRef, { 
                     target: parseFloat(document.getElementById('input-target-admin').value),
+                    collected: parseFloat(document.getElementById('input-collected-admin').value),
                     lastUpdate: new Date().toISOString()
                 }, { merge: true });
-                showToast("Target dana diperbarui!");
+                showToast("Data dana diperbarui!");
             } catch(error) { showToast("Gagal", "error"); } 
             finally { btn.innerText = originalText; btn.disabled = false; }
         });
@@ -742,109 +900,189 @@
         // --- Logic Import CSV ---
         const fileInputCSV = document.getElementById('input-csv');
         const btnProcessCSV = document.getElementById('btn-process-csv');
+        const btnCancelCSV = document.getElementById('btn-cancel-csv');
         const labelNameCSV = document.getElementById('label-csv-name');
+        
+        let parsedCsvData = [];
+        let parsedCsvTotal = 0;
+
+        function resetCsvUI() {
+            fileInputCSV.value = '';
+            labelNameCSV.innerHTML = '<i class="fa-solid fa-upload mr-1"></i> Pilih File CSV...';
+            parsedCsvData = [];
+            parsedCsvTotal = 0;
+            document.getElementById('csv-input-container').classList.remove('hidden');
+            document.getElementById('csv-preview-container').classList.add('hidden');
+        }
 
         fileInputCSV.addEventListener('change', (e) => {
-            if(e.target.files.length > 0) {
-                labelNameCSV.innerText = e.target.files[0].name;
-                labelNameCSV.classList.replace('text-slate-500', 'text-emerald-600');
-                labelNameCSV.classList.add('font-bold');
-            } else {
-                labelNameCSV.innerText = 'Pilih File CSV...';
-                labelNameCSV.classList.replace('text-emerald-600', 'text-slate-500');
-                labelNameCSV.classList.remove('font-bold');
-            }
+            const file = e.target.files[0];
+            if(!file) return;
+
+            labelNameCSV.innerText = file.name;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                
+                parsedCsvData = [];
+                parsedCsvTotal = 0;
+
+                let startIndex = 0;
+                if (lines.length > 0 && (lines[0].toLowerCase().includes('tanggal') || lines[0].toLowerCase().includes('nama'))) {
+                    startIndex = 1;
+                }
+
+                for(let i=startIndex; i<lines.length; i++) {
+                    const line = lines[i].trim();
+                    if(!line) continue;
+
+                    const delimiter = line.includes(';') ? ';' : ',';
+                    let parts = line.split(delimiter).map(p => p.trim());
+                    
+                    if(parts.length >= 3) {
+                        const dateStrRaw = parts[0];
+                        const amountStr = parts.pop().replace(/[^0-9]/g, ''); 
+                        parts.shift(); 
+                        const name = parts.join(delimiter).trim(); 
+                        const amount = parseFloat(amountStr);
+
+                        let dateStr = new Date().toISOString();
+                        let parsedDate = new Date(dateStrRaw);
+                        if (!isNaN(parsedDate.getTime())) {
+                            dateStr = parsedDate.toISOString();
+                        }
+
+                        if(name && !isNaN(amount) && amount > 0) {
+                            parsedCsvData.push({ name, amount, dateStr });
+                            parsedCsvTotal += amount;
+                        }
+                    }
+                }
+
+                if(parsedCsvData.length > 0) {
+                    const tbody = document.getElementById('csv-preview-table-body');
+                    
+                    const previewLimit = 100;
+                    const itemsToPreview = parsedCsvData.slice(0, previewLimit);
+                    let htmlString = '';
+                    
+                    itemsToPreview.forEach(item => {
+                        const displayDate = formatDate(item.dateStr);
+                        htmlString += `
+                            <tr>
+                                <td class="py-1.5 px-1 whitespace-nowrap text-[9px]">${displayDate}</td>
+                                <td class="py-1.5 px-1 truncate max-w-[100px] font-bold">${item.name}</td>
+                                <td class="py-1.5 px-1 text-right text-emerald-600 font-bold">${formatRupiah(item.amount)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    if (parsedCsvData.length > previewLimit) {
+                        htmlString += `<tr><td colspan="3" class="text-center py-3 text-slate-500 text-[10px] bg-slate-100 font-medium rounded">...dan ${parsedCsvData.length - previewLimit} baris lainnya (hanya menampilkan 100 baris pertama)</td></tr>`;
+                    }
+                    
+                    tbody.innerHTML = htmlString;
+
+                    document.getElementById('csv-preview-count').innerText = `${parsedCsvData.length} Data Siap Import`;
+                    document.getElementById('csv-preview-total').innerText = `Total: ${formatRupiah(parsedCsvTotal)}`;
+                    
+                    document.getElementById('csv-input-container').classList.add('hidden');
+                    document.getElementById('csv-preview-container').classList.remove('hidden');
+                } else {
+                    showToast("Gagal. Format CSV salah atau data kosong.", "error");
+                    resetCsvUI();
+                }
+            };
+            reader.readAsText(file);
         });
 
-        btnProcessCSV.addEventListener('click', () => {
-            const file = fileInputCSV.files[0];
-            if(!file) return showToast("Silakan pilih file CSV terlebih dahulu!", "error");
+        btnCancelCSV.addEventListener('click', resetCsvUI);
 
-            showConfirmModal("Import CSV", `Sistem akan memproses data dari ${file.name}. Lanjutkan?`, async () => {
+        btnProcessCSV.addEventListener('click', () => {
+            if(parsedCsvData.length === 0) return;
+
+            showConfirmModal("Import CSV", `Sistem akan mengimport ${parsedCsvData.length} data dengan total ${formatRupiah(parsedCsvTotal)}. Lanjutkan?`, async () => {
                 btnProcessCSV.disabled = true;
                 const originalText = btnProcessCSV.innerText;
                 btnProcessCSV.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const text = e.target.result;
-                    const lines = text.split('\n');
-                    let totalNewAmount = 0;
-                    let successCount = 0;
-
-                    for(let i=0; i<lines.length; i++) {
-                        const line = lines[i].trim();
-                        if(!line) continue; // skip baris kosong
-
-                        // Cek pemisah (mendukung koma atau titik koma)
-                        const delimiter = line.includes(';') ? ';' : ',';
-                        let parts = line.split(delimiter).map(p => p.trim());
+                try {
+                    const chunkSize = 400; // Batch limit Firebase
+                    for (let i = 0; i < parsedCsvData.length; i += chunkSize) {
+                        const chunk = parsedCsvData.slice(i, i + chunkSize);
+                        const batch = writeBatch(db);
                         
-                        if(parts.length >= 2) {
-                            let dateStr = new Date().toISOString();
-
-                            // Cek apakah bagian terakhir adalah tanggal (format DD-MM-YY atau DD-MM-YYYY atau DD/MM/YY)
-                            const dateRegex = /^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/;
-                            let lastPart = parts[parts.length - 1];
-
-                            if (dateRegex.test(lastPart)) {
-                                let match = lastPart.match(dateRegex);
-                                let d = parseInt(match[1]);
-                                let m = parseInt(match[2]) - 1; // Bulan di JS dimulai dari 0
-                                let y = parseInt(match[3]);
-                                if (y < 100) y += 2000; // Asumsikan tahun 2000-an jika format YY
-                                
-                                let dateObj = new Date(y, m, d);
-                                if (!isNaN(dateObj.getTime())) {
-                                    dateStr = dateObj.toISOString();
-                                }
-                                parts.pop(); // Hapus elemen tanggal dari array
-                            }
-
-                            // Sekarang sisa elemen minimal 2 (nama, jumlah)
-                            if (parts.length >= 2) {
-                                // Ambil elemen terakhir sebagai jumlah, gabungkan sisanya sebagai nama
-                                const amountStr = parts.pop().replace(/[^0-9]/g, ''); // bersihkan simbol Rp atau spasi
-                                const name = parts.join(delimiter).trim();
-                                const amount = parseFloat(amountStr);
-
-                                if(name && !isNaN(amount) && amount > 0) {
-                                    try {
-                                        await addDoc(donorsColRef, {
-                                            name: name,
-                                            amount: amount,
-                                            status: 'approved',
-                                            date: dateStr,
-                                            wa: '-',
-                                            message: 'Donasi Manual (Import CSV)'
-                                        });
-                                        totalNewAmount += amount;
-                                        successCount++;
-                                    } catch(err) {
-                                        console.error("Gagal insert baris", i, err);
-                                    }
-                                }
-                            }
-                        }
+                        chunk.forEach(item => {
+                            const newDocRef = doc(donorsColRef);
+                            batch.set(newDocRef, {
+                                name: item.name,
+                                amount: item.amount,
+                                status: 'approved',
+                                date: item.dateStr,
+                                wa: '-',
+                                message: 'Donasi Manual (Import CSV)'
+                            });
+                        });
+                        
+                        await batch.commit();
                     }
 
-                    if(successCount > 0) {
-                        await updateCampaignTotal(totalNewAmount);
-                        showToast(`Berhasil import ${successCount} data donatur!`);
-                    } else {
-                        showToast("Gagal. Format CSV salah atau data kosong.", "error");
-                    }
-
-                    // Reset File Input
-                    fileInputCSV.value = '';
-                    labelNameCSV.innerText = 'Pilih File CSV...';
-                    labelNameCSV.classList.replace('text-emerald-600', 'text-slate-500');
-                    labelNameCSV.classList.remove('font-bold');
+                    await updateCampaignTotal(parsedCsvTotal);
+                    
+                    showToast(`Berhasil import ${parsedCsvData.length} data donatur!`);
+                    resetCsvUI();
+                } catch(err) {
+                    console.error("Gagal import", err);
+                    showToast("Terjadi kesalahan saat import data.", "error");
                     btnProcessCSV.disabled = false;
-                    btnProcessCSV.innerText = originalText;
-                };
-                reader.readAsText(file);
+                    btnProcessCSV.innerHTML = originalText;
+                }
             });
+        });
+
+        // --- Logic Export CSV & Format ---
+        document.getElementById('btn-download-format').addEventListener('click', () => {
+            const csvContent = "tanggal,nama lengkap,jumlah\n2026-04-24,Rahmat,50000\n2026-04-26,Daud Ridwan Mahande,50000\n";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "format_import_donatur.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Format CSV berhasil diunduh!");
+        });
+
+        document.getElementById('btn-export-csv').addEventListener('click', () => {
+            if (globalApprovedDonors.length === 0) {
+                return showToast("Belum ada data donatur untuk dieksport.", "error");
+            }
+            
+            let csvContent = "Nama,Jumlah,Tanggal,Pesan\n";
+            globalApprovedDonors.forEach(donor => {
+                // Mencegah error jika di dalam nama/pesan ada karakter koma
+                const name = `"${(donor.name || '').replace(/"/g, '""')}"`;
+                const amount = donor.amount || 0;
+                const date = formatDate(donor.date); 
+                const message = `"${(donor.message || '').replace(/"/g, '""')}"`;
+                
+                csvContent += `${name},${amount},${date},${message}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `data_donatur_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Data donatur berhasil dieksport!");
         });
 
         if (app) initAuth();
