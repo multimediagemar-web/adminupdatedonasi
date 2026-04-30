@@ -11,22 +11,13 @@
         
         body {
             font-family: 'Plus+Jakarta+Sans', sans-serif;
-            background-color: #cbd5e1; /* Latar abu-abu gelap untuk desktop agar batas HP terlihat */
+            background-color: #cbd5e1; 
         }
 
-        /* Sembunyikan scrollbar tapi tetap bisa scroll */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Tab Transition */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
@@ -35,11 +26,9 @@
 </head>
 <body class="text-slate-800">
 
-    <!-- Mobile Wrapper -->
     <div class="max-w-md mx-auto bg-slate-50 h-[100dvh] relative shadow-2xl sm:border-x sm:border-slate-300 overflow-hidden flex flex-col">
 
-        <!-- Top Navigation -->
-        <nav class="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
+        <nav class="bg-emerald-700 text-white shadow-md sticky top-0 z-50 shrink-0">
             <div class="px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-user-shield text-lg text-emerald-300"></i>
@@ -51,13 +40,9 @@
             </div>
         </nav>
 
-        <!-- Main Dashboard Container -->
-        <main class="flex-1 px-4 py-5 overflow-y-auto no-scrollbar pb-32">
+        <main class="flex-1 px-4 py-5 overflow-y-auto no-scrollbar pb-24">
             
-            <!-- ================= VIEW 1: BERANDA ================= -->
             <div id="view-home" class="space-y-5 fade-in block">
-                
-                <!-- Quick Stats Overview -->
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-emerald-500">
                         <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Target</p>
@@ -79,7 +64,6 @@
                     </div>
                 </div>
 
-                <!-- Konfirmasi Donasi Baru -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 bg-orange-50/50 flex justify-between items-center">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -93,10 +77,8 @@
                 </div>
             </div>
 
-            <!-- ================= VIEW 2: KEUANGAN ================= -->
             <div id="view-finance" class="space-y-5 fade-in hidden">
                 
-                <!-- Ubah Ringkasan Dana Manual -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -111,7 +93,12 @@
                                     <input type="number" id="input-target-admin" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" required>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Terkumpul (Otomatis)</label>
+                                    <div class="flex justify-between items-end mb-1">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase">Terkumpul</label>
+                                        <button type="button" id="btn-sync-total" class="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold hover:bg-blue-100 transition-colors" title="Hitung ulang otomatis berdasarkan riwayat">
+                                            <i class="fa-solid fa-rotate"></i> Sinkronkan
+                                        </button>
+                                    </div>
                                     <input type="number" id="input-collected-admin" class="w-full border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed rounded-lg px-3 py-2 text-sm outline-none" readonly>
                                 </div>
                             </div>
@@ -120,14 +107,12 @@
                     </div>
                 </div>
 
-                <!-- Manajemen Rincian Biaya -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 flex justify-between items-center">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-file-invoice-dollar text-purple-600"></i> Rincian Biaya (Spending)
                         </h2>
                     </div>
-                    
                     <div class="p-3">
                         <div id="admin-spending-list-container" class="space-y-2 mb-4 max-h-40 overflow-y-auto no-scrollbar border border-slate-100 p-2 rounded-xl bg-slate-50">
                             <div class="text-center py-2 text-slate-400 text-[10px]">Memuat item...</div>
@@ -165,7 +150,26 @@
                     </div>
                 </div>
 
-                <!-- Daftar Donatur Tervalidasi -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 flex justify-between items-center bg-green-50/50">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-csv text-green-600"></i> Import Donatur (CSV)
+                        </h2>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-[10px] text-slate-500 mb-3 leading-relaxed">Format baris: <code class="bg-slate-100 px-1 py-0.5 rounded text-red-500 font-bold">nama,jumlah,tanggal(opsional)</code>. Contoh: <code class="bg-slate-100 px-1 py-0.5 rounded text-red-500 font-bold">Budi,50000,25-09-24</code>. Tidak perlu baris header. Data otomatis Lunas & masuk Total Dana.</p>
+                        <div class="flex items-center gap-2">
+                            <input type="file" id="input-csv" accept=".csv" class="hidden">
+                            <label for="input-csv" class="flex-1 border border-slate-300 border-dashed rounded-lg px-3 py-2 text-[11px] text-center text-slate-500 cursor-pointer hover:bg-slate-50 transition-colors truncate" id="label-csv-name">
+                                Pilih File CSV...
+                            </label>
+                            <button id="btn-process-csv" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors disabled:opacity-50">
+                                Import
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 flex justify-between items-center">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -179,10 +183,7 @@
                 </div>
             </div>
 
-            <!-- ================= VIEW 3: KONTEN PUBLIK ================= -->
             <div id="view-content" class="space-y-5 fade-in hidden">
-                
-                <!-- Posting Kabar Terbaru -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 flex justify-between items-center">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -190,7 +191,6 @@
                         </h2>
                     </div>
                     <div class="p-3 space-y-4">
-                        <!-- Form -->
                         <div>
                             <form id="form-add-update" class="space-y-2.5">
                                 <input type="text" id="update-title" placeholder="Judul Kabar" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500" required>
@@ -203,7 +203,6 @@
                             </form>
                         </div>
 
-                        <!-- List Updates -->
                         <div class="border-t border-slate-100 pt-3">
                             <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Riwayat Kabar</h3>
                             <div id="admin-updates-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar bg-slate-50 p-2 rounded-xl border border-slate-100">
@@ -213,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- Pengaturan Tampilan Publik -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -246,7 +244,6 @@
 
         </main>
         
-        <!-- Bottom Tab Navigation (Floating) -->
         <nav class="absolute bottom-6 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200 flex justify-around items-center py-3 px-2 z-40 rounded-2xl shadow-2xl">
             <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center justify-center w-20 text-emerald-600 gap-1 transition-colors">
                 <i class="fa-solid fa-house text-[18px]"></i>
@@ -262,7 +259,6 @@
             </button>
         </nav>
 
-        <!-- Custom Modal Konfirmasi -->
         <div id="confirm-modal" class="absolute inset-0 bg-slate-900/60 z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300 backdrop-blur-sm">
             <div class="bg-white rounded-2xl p-5 w-[85%] shadow-xl transform scale-95 transition-transform duration-300" id="confirm-modal-box">
                 <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-3">
@@ -277,30 +273,25 @@
             </div>
         </div>
 
-        <!-- Bottom Toast Notification Container -->
         <div id="toast-container" class="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-[110] flex flex-col gap-2 pointer-events-none w-full px-4 items-center"></div>
 
-    </div> <!-- End Mobile Wrapper -->
+    </div>
 
     <script>
         // --- Navigation Logic ---
         function switchTab(tabName) {
-            // Hide all views
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-finance').classList.add('hidden');
             document.getElementById('view-content').classList.add('hidden');
 
-            // Reset tab styles
             const baseTabClass = "flex flex-col items-center justify-center w-20 text-slate-400 hover:text-emerald-500 gap-1 transition-colors";
             document.getElementById('tab-home').className = baseTabClass;
             document.getElementById('tab-finance').className = baseTabClass;
             document.getElementById('tab-content').className = baseTabClass;
 
-            // Show target view & set active tab style
             document.getElementById(`view-${tabName}`).classList.remove('hidden');
             document.getElementById(`tab-${tabName}`).className = "flex flex-col items-center justify-center w-20 text-emerald-600 gap-1 transition-colors";
             
-            // Scroll to top when switching tab
             document.querySelector('main').scrollTo(0,0);
         }
 
@@ -312,18 +303,13 @@
             document.getElementById('confirm-modal-title').innerText = title;
             document.getElementById('confirm-modal-desc').innerText = desc;
             
-            // Tampilkan modal dengan animasi
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                box.classList.remove('scale-95');
-            }, 10);
+            setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
 
             const btnOk = document.getElementById('confirm-btn-ok');
             const btnCancel = document.getElementById('confirm-btn-cancel');
             
-            // Bersihkan Event Listener lama dengan men-clone tombol
             const newBtnOk = btnOk.cloneNode(true);
             const newBtnCancel = btnCancel.cloneNode(true);
             btnOk.parentNode.replaceChild(newBtnOk, btnOk);
@@ -332,21 +318,16 @@
             const hideModal = () => {
                 modal.classList.add('opacity-0');
                 box.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }, 300);
+                setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
             };
 
             newBtnCancel.addEventListener('click', hideModal);
             
             newBtnOk.addEventListener('click', async () => {
                 const originalText = newBtnOk.innerHTML;
-                newBtnOk.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; // Loading icon
+                newBtnOk.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; 
                 newBtnOk.disabled = true;
-                
                 await onConfirmCallback();
-                
                 hideModal();
                 newBtnOk.innerHTML = originalText;
                 newBtnOk.disabled = false;
@@ -380,11 +361,9 @@
             return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        // Set default date
         document.getElementById('update-date').valueAsDate = new Date();
     </script>
 
-    <!-- --- Firebase Logic --- -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -404,7 +383,6 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-            
             appId = 'masjid-ashqaf-production-v1'; 
         } catch (error) {
             console.error("Firebase Init Error:", error);
@@ -414,6 +392,9 @@
         const donorsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'donors');
         const updatesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'updates');
         const spendingColRef = collection(db, 'artifacts', appId, 'public', 'data', 'spending');
+
+        // Variabel global untuk menyimpan data donatur lunas agar bisa di-sinkronisasi
+        let globalApprovedDonors = [];
 
         async function initAuth() {
             try {
@@ -430,8 +411,12 @@
                 const snap = await getDoc(campaignRef);
                 if (snap.exists()) {
                     const current = snap.data().collected || 0;
+                    // Pastikan nilai tidak pernah kurang dari 0 (mencegah minus)
+                    let newTotal = current + amountToAdd;
+                    newTotal = Math.max(0, newTotal); 
+                    
                     await updateDoc(campaignRef, {
-                        collected: current + amountToAdd,
+                        collected: newTotal,
                         lastUpdate: new Date().toISOString()
                     });
                 }
@@ -439,7 +424,7 @@
         }
 
         function setupListeners() {
-            // 1. Campaign Data Listener
+            // 1. Campaign Data
             onSnapshot(campaignRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -452,11 +437,9 @@
                     document.getElementById('input-header-image').value = data.headerImageUrl || data.headerVideoUrl || '';
                     document.getElementById('input-program-desc').value = data.programDescription || '';
                 }
-            }, (e) => {
-                if(e.code === 'permission-denied') showToast("Error Firebase: Cek Aturan Keamanan!", "error");
             });
 
-            // 2. Donors Listener
+            // 2. Donors Data
             onSnapshot(donorsColRef, (snapshot) => {
                 const allDonors = [];
                 snapshot.forEach(doc => allDonors.push({ id: doc.id, ...doc.data() }));
@@ -464,6 +447,9 @@
 
                 const pendingDonors = allDonors.filter(d => d.status === 'pending');
                 const approvedDonors = allDonors.filter(d => d.status === 'approved');
+                
+                // Simpan ke variabel global untuk keperluan sinkronisasi ulang
+                globalApprovedDonors = approvedDonors;
 
                 // Render Pending
                 document.getElementById('stat-pending-count').innerText = pendingDonors.length;
@@ -523,7 +509,7 @@
                     });
                 }
 
-                // Events
+                // Action Events
                 document.querySelectorAll('.admin-approve-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const id = e.currentTarget.getAttribute('data-id');
@@ -539,10 +525,10 @@
                 document.querySelectorAll('.admin-reject-btn').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
                         const id = e.currentTarget.getAttribute('data-id');
-                        showConfirmModal("Tolak Donasi", "Data antrean donasi ini akan dihapus dan batal diproses.", async () => {
+                        showConfirmModal("Tolak Donasi", "Data antrean donasi ini akan dihapus.", async () => {
                             try {
                                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
-                                showToast("Data dihapus.");
+                                showToast("Data ditolak.");
                             } catch (err) { showToast("Gagal", "error"); }
                         });
                     });
@@ -553,7 +539,7 @@
                         const targetBtn = e.currentTarget.closest('button');
                         const id = targetBtn.getAttribute('data-id');
                         const amount = parseFloat(targetBtn.getAttribute('data-amount'));
-                        showConfirmModal("Hapus Riwayat Donatur", "Total dana yang terkumpul akan otomatis dikurangi sejumlah donasi ini.", async () => {
+                        showConfirmModal("Hapus Riwayat Donatur", "Total dana akan otomatis dikurangi sejumlah donasi ini.", async () => {
                             try {
                                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'donors', id));
                                 await updateCampaignTotal(-amount);
@@ -562,9 +548,9 @@
                         });
                     });
                 });
-            }, (e) => console.error(e));
+            });
 
-            // 3. Spending Listener
+            // 3. Spending Data
             onSnapshot(spendingColRef, (snapshot) => {
                 const spendingItems = [];
                 snapshot.forEach(doc => spendingItems.push({ id: doc.id, ...doc.data() }));
@@ -579,7 +565,7 @@
                     spendingItems.forEach((item) => {
                         const isLunas = item.status === 'lunas';
                         const badgeClass = isLunas ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700";
-                        const notaButton = item.notaUrl ? `<a href="${item.notaUrl}" target="_blank" class="mt-1 inline-block bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] px-2.5 py-1.5 rounded font-medium transition-colors border border-slate-200"><i class="fa-solid fa-file-invoice mr-1"></i> Lihat Nota / Bukti</a>` : '';
+                        const notaButton = item.notaUrl ? `<a href="${item.notaUrl}" target="_blank" class="mt-1 inline-block bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] px-2.5 py-1.5 rounded font-medium transition-colors border border-slate-200"><i class="fa-solid fa-file-invoice mr-1"></i> Lihat Nota</a>` : '';
                         
                         container.innerHTML += `
                             <div class="flex flex-col bg-white p-2.5 border border-slate-200 rounded-lg text-xs shadow-sm mb-1.5">
@@ -604,7 +590,7 @@
                         btn.addEventListener('click', async (e) => {
                             const targetBtn = e.currentTarget.closest('button');
                             const id = targetBtn.getAttribute('data-id');
-                            showConfirmModal("Hapus Rincian Biaya", "Rincian biaya ini akan dihapus secara permanen dari daftar pengeluaran.", async () => {
+                            showConfirmModal("Hapus Rincian Biaya", "Rincian biaya ini akan dihapus permanen.", async () => {
                                 try {
                                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spending', id));
                                     showToast("Rincian dihapus");
@@ -613,9 +599,9 @@
                         });
                     });
                 }
-            }, (e) => console.error(e));
+            });
 
-            // 4. Updates Listener
+            // 4. Updates Data
             onSnapshot(updatesColRef, (snapshot) => {
                 const updates = [];
                 snapshot.forEach(doc => updates.push({ id: doc.id, ...doc.data() }));
@@ -646,7 +632,7 @@
                     btn.addEventListener('click', async (e) => {
                         const targetBtn = e.currentTarget.closest('button');
                         const id = targetBtn.getAttribute('data-id');
-                        showConfirmModal("Hapus Kabar", "Kabar/update ini akan dihapus dan tidak lagi tampil di halaman donatur.", async () => {
+                        showConfirmModal("Hapus Kabar", "Kabar ini akan dihapus dari halaman donatur.", async () => {
                             try {
                                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'updates', id));
                                 showToast("Kabar dihapus");
@@ -654,7 +640,7 @@
                         });
                     });
                 });
-            }, (e) => console.error(e));
+            });
         }
 
         // --- Form Handlers ---
@@ -663,7 +649,6 @@
             const btn = e.target.querySelector('button');
             const originalText = btn.innerText;
             btn.innerText = 'Menyimpan...'; btn.disabled = true;
-
             try {
                 await setDoc(campaignRef, { 
                     target: parseFloat(document.getElementById('input-target-admin').value),
@@ -674,15 +659,34 @@
             finally { btn.innerText = originalText; btn.disabled = false; }
         });
 
+        // --- Fitur Sinkronisasi Ulang Total Dana ---
+        document.getElementById('btn-sync-total').addEventListener('click', async () => {
+            showConfirmModal("Sinkronkan Total Dana", "Sistem akan menghitung ulang seluruh total dana berdasarkan riwayat donatur yang valid. Lanjutkan?", async () => {
+                try {
+                    let realTotal = 0;
+                    globalApprovedDonors.forEach(donor => {
+                        realTotal += (donor.amount || 0);
+                    });
+
+                    await setDoc(campaignRef, { 
+                        collected: realTotal,
+                        lastUpdate: new Date().toISOString()
+                    }, { merge: true });
+                    
+                    showToast("Total dana berhasil dikalkulasi ulang!");
+                } catch(err) {
+                    showToast("Gagal mensinkronkan data", "error");
+                }
+            });
+        });
+
         document.getElementById('form-add-spending').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-add-spending');
             const originalText = btn.innerText;
             btn.innerText = 'Menyimpan...'; btn.disabled = true;
-
             try {
                 const notaUrlInput = document.getElementById('spending-nota-url').value;
-
                 await addDoc(spendingColRef, {
                     title: document.getElementById('spending-title').value,
                     amount: parseFloat(document.getElementById('spending-amount').value),
@@ -703,7 +707,6 @@
             const btn = document.getElementById('btn-add-update');
             const originalText = btn.innerText;
             btn.innerText = 'Memposting...'; btn.disabled = true;
-
             try {
                 await addDoc(updatesColRef, {
                     title: document.getElementById('update-title').value,
@@ -723,7 +726,6 @@
             const btn = e.target.querySelector('button');
             const originalText = btn.innerText;
             btn.innerText = 'Menyimpan...'; btn.disabled = true;
-
             try {
                 await setDoc(campaignRef, { 
                     headerTitle: document.getElementById('input-header-title').value,
@@ -735,6 +737,114 @@
                 showToast("Pengaturan disimpan!");
             } catch (error) { showToast("Gagal", "error"); } 
             finally { btn.innerText = originalText; btn.disabled = false; }
+        });
+
+        // --- Logic Import CSV ---
+        const fileInputCSV = document.getElementById('input-csv');
+        const btnProcessCSV = document.getElementById('btn-process-csv');
+        const labelNameCSV = document.getElementById('label-csv-name');
+
+        fileInputCSV.addEventListener('change', (e) => {
+            if(e.target.files.length > 0) {
+                labelNameCSV.innerText = e.target.files[0].name;
+                labelNameCSV.classList.replace('text-slate-500', 'text-emerald-600');
+                labelNameCSV.classList.add('font-bold');
+            } else {
+                labelNameCSV.innerText = 'Pilih File CSV...';
+                labelNameCSV.classList.replace('text-emerald-600', 'text-slate-500');
+                labelNameCSV.classList.remove('font-bold');
+            }
+        });
+
+        btnProcessCSV.addEventListener('click', () => {
+            const file = fileInputCSV.files[0];
+            if(!file) return showToast("Silakan pilih file CSV terlebih dahulu!", "error");
+
+            showConfirmModal("Import CSV", `Sistem akan memproses data dari ${file.name}. Lanjutkan?`, async () => {
+                btnProcessCSV.disabled = true;
+                const originalText = btnProcessCSV.innerText;
+                btnProcessCSV.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const text = e.target.result;
+                    const lines = text.split('\n');
+                    let totalNewAmount = 0;
+                    let successCount = 0;
+
+                    for(let i=0; i<lines.length; i++) {
+                        const line = lines[i].trim();
+                        if(!line) continue; // skip baris kosong
+
+                        // Cek pemisah (mendukung koma atau titik koma)
+                        const delimiter = line.includes(';') ? ';' : ',';
+                        let parts = line.split(delimiter).map(p => p.trim());
+                        
+                        if(parts.length >= 2) {
+                            let dateStr = new Date().toISOString();
+
+                            // Cek apakah bagian terakhir adalah tanggal (format DD-MM-YY atau DD-MM-YYYY atau DD/MM/YY)
+                            const dateRegex = /^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/;
+                            let lastPart = parts[parts.length - 1];
+
+                            if (dateRegex.test(lastPart)) {
+                                let match = lastPart.match(dateRegex);
+                                let d = parseInt(match[1]);
+                                let m = parseInt(match[2]) - 1; // Bulan di JS dimulai dari 0
+                                let y = parseInt(match[3]);
+                                if (y < 100) y += 2000; // Asumsikan tahun 2000-an jika format YY
+                                
+                                let dateObj = new Date(y, m, d);
+                                if (!isNaN(dateObj.getTime())) {
+                                    dateStr = dateObj.toISOString();
+                                }
+                                parts.pop(); // Hapus elemen tanggal dari array
+                            }
+
+                            // Sekarang sisa elemen minimal 2 (nama, jumlah)
+                            if (parts.length >= 2) {
+                                // Ambil elemen terakhir sebagai jumlah, gabungkan sisanya sebagai nama
+                                const amountStr = parts.pop().replace(/[^0-9]/g, ''); // bersihkan simbol Rp atau spasi
+                                const name = parts.join(delimiter).trim();
+                                const amount = parseFloat(amountStr);
+
+                                if(name && !isNaN(amount) && amount > 0) {
+                                    try {
+                                        await addDoc(donorsColRef, {
+                                            name: name,
+                                            amount: amount,
+                                            status: 'approved',
+                                            date: dateStr,
+                                            wa: '-',
+                                            message: 'Donasi Manual (Import CSV)'
+                                        });
+                                        totalNewAmount += amount;
+                                        successCount++;
+                                    } catch(err) {
+                                        console.error("Gagal insert baris", i, err);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(successCount > 0) {
+                        await updateCampaignTotal(totalNewAmount);
+                        showToast(`Berhasil import ${successCount} data donatur!`);
+                    } else {
+                        showToast("Gagal. Format CSV salah atau data kosong.", "error");
+                    }
+
+                    // Reset File Input
+                    fileInputCSV.value = '';
+                    labelNameCSV.innerText = 'Pilih File CSV...';
+                    labelNameCSV.classList.replace('text-emerald-600', 'text-slate-500');
+                    labelNameCSV.classList.remove('font-bold');
+                    btnProcessCSV.disabled = false;
+                    btnProcessCSV.innerText = originalText;
+                };
+                reader.readAsText(file);
+            });
         });
 
         if (app) initAuth();
